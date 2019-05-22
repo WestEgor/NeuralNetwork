@@ -53,12 +53,12 @@ public class Structure {
 
     public void setX() {
         for (int i = 0; i < x.length; i++) {
-            x[i] = Math.random() * 2;
+            this.x[i] = Math.random() * 1;
         }
-        if (dataSize > 2) {
+       /* if (dataSize > 2) {
             //нормализация данных
             this.x = normalize(x);
-        }
+        }*/
     }
 
     public double[] getY() {
@@ -67,12 +67,12 @@ public class Structure {
 
     public void setY() {
         for (int i = 0; i < y.length; i++) {
-            y[i] = Math.random() * 3;
+            this.y[i] = Math.random() * 1;
         }
-        if (dataSize > 2) {
-            //нормализация данных
+        /*if (dataSize > 2) {
             this.y = normalize(y);
-        }
+
+        }*/
     }
 
     public double[] getF() {
@@ -81,12 +81,16 @@ public class Structure {
 
     public void setF() {
         for (int i = 0; i < f.length; i++) {
-            f[i] = Math.random() * 17;
+            this.f[i] = Math.random() * 1;
         }
         if (dataSize > 2) {
             //нормализация данных
             this.f = normalize(f);
         }
+    }
+
+    public void setF(double[] vector){
+        this.f = vector;
     }
 
     public double[][] getInputLayer() {
@@ -140,16 +144,12 @@ public class Structure {
     }
 
     public void setHiddenLayer() {
-        for (int k = 0; k < dataSize; k++) {
-            for (int i = 0; i < hiddenWeights.length; i++) {
-                for (int j = 0; j < hiddenWeights[0].length; j++) {
-                    if (j == 0) {
-                        hiddenLayer[k][j] = 1;
-                    }
-                    hiddenLayer[k][j] += inputLayer[k][i] * hiddenWeights[i][j];
-                }
-            }
+
+        for (int i = 0; i < inputLayer.length; i++) { // data row
+            double resultLine[] = getNewNodeValue(inputLayer[i][0], inputLayer[i][1], inputLayer[i][2]);
+            hiddenLayer[i] = resultLine;
         }
+
 
         for (int i = 0; i < hiddenLayer.length; i++) {
             for (int j = 0; j < hiddenLayer[0].length; j++) {
@@ -158,23 +158,43 @@ public class Structure {
         }
     }
 
+    private double[] getNewNodeValue(double i, double x, double y) {
+        double res[] = new double[6];
+        res[0] = 1;
+
+        for (int j = 0; j < hiddenWeights[0].length; j++) {
+            double summ = i * hiddenWeights[0][j] + x * hiddenWeights[1][j] + y * hiddenWeights[2][j];
+            res[j + 1] = summ;
+        }
+        return res;
+    }
+
 
     public double[] getT() {
         return t;
     }
 
-    public void setT() {
-        for (int k = 0; k < dataSize; k++) {
-            for (int i = 0; i < outputWeights.length; i++) {
-                for (int j = 0; j < outputWeights[0].length; j++) {
-                    this.t[k] += hiddenLayer[k][j] * outputWeights[i][j];
-                }
-            }
-        }
 
+    public void setT() {
+        double resultLine;
+        for (int i = 0; i < hiddenLayer.length; i++) { // data row
+            resultLine = getNewValue(hiddenLayer[i][0], hiddenLayer[i][1], hiddenLayer[i][2], hiddenLayer[i][3],
+                    hiddenLayer[i][4], hiddenLayer[i][5]);
+            t[i] = resultLine;
+        }
         for (int i = 0; i < t.length; i++) {
             this.t[i] = activationFunc(t[i]);
         }
+    }
+
+    private double getNewValue(double one, double two, double three, double four, double five, double six) {
+        double res = 0;
+        for (int j = 0; j < outputWeights[0].length; j++) {
+            res = one * outputWeights[0][j] + two * outputWeights[1][j] + three * outputWeights[2][j] +
+                    four * outputWeights[3][j] + five * outputWeights[4][j] + six * outputWeights[5][j];
+
+        }
+        return res;
     }
 
     public double getErrorFunction() {
@@ -202,7 +222,5 @@ public class Structure {
     private double activationFunc(double number) {
         return 1 / (1 + Math.exp(-number));
     }
-
-
 }
 
